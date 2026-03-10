@@ -1,0 +1,21 @@
+[package]
+name = "skimmd"
+version = "1.0.0"
+description = "A native macOS markdown reader and editor"
+authors = [""]
+edition = "2021"
+
+[lib]
+name = "skimmd_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-fs = { version = "2", features = ["watch"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-store = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
