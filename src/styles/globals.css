@@ -24,6 +24,13 @@
   --font-mono: "JetBrains Mono", "SF Mono", monospace;
   --hover-bg: rgba(55, 53, 47, 0.04);
   --active-bg: rgba(55, 53, 47, 0.08);
+  --red: #e93147;
+  --orange: #ec7500;
+  --yellow: #e0ac00;
+  --green: #08b94e;
+  --cyan: #00bfbc;
+  --purple: #7852ee;
+  --pink: #d53984;
   --sidebar-bg: #fbfbfa;
   --sidebar-hover: rgba(55, 53, 47, 0.04);
   --sidebar-active: rgba(47, 111, 237, 0.08);
@@ -52,6 +59,13 @@
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.15);
   --hover-bg: rgba(255, 255, 255, 0.04);
   --active-bg: rgba(255, 255, 255, 0.08);
+  --red: #fb464c;
+  --orange: #e9973f;
+  --yellow: #e0de71;
+  --green: #44cf6e;
+  --cyan: #53dfdd;
+  --purple: #a882ff;
+  --pink: #fa99cd;
   --sidebar-bg: #202020;
   --sidebar-hover: rgba(255, 255, 255, 0.04);
   --sidebar-active: rgba(91, 154, 255, 0.12);
@@ -72,6 +86,8 @@ body {
   color: var(--ink);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Layout */
@@ -321,6 +337,7 @@ body {
 .sidebar-workspaces {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 8px 0;
 }
 
@@ -467,6 +484,18 @@ body {
 .file-item.active {
   background: var(--sidebar-active);
   color: var(--accent);
+  position: relative;
+}
+
+.file-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
 }
 
 .file-item.active .file-icon {
@@ -699,6 +728,7 @@ body {
 .editor-container .editor-wrapper {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .editor-container .editor-wrapper::-webkit-scrollbar {

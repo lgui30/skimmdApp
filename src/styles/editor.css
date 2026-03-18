@@ -7,10 +7,12 @@
   line-height: 1.7;
   color: var(--ink);
   caret-color: var(--ink);
+  max-width: 70ch;
+  margin: 0 auto;
 }
 
 .tiptap > * + * {
-  margin-top: 0.5em;
+  margin-top: 0.75em;
 }
 
 /* Headings */
@@ -52,7 +54,7 @@
 }
 
 .tiptap p + p {
-  margin-top: 0.5em;
+  margin-top: 0.75em;
 }
 
 /* Links */
@@ -247,6 +249,10 @@
   background: rgba(47, 111, 237, 0.2);
 }
 
+[data-theme="dark"] .tiptap ::selection {
+  background: rgba(91, 154, 255, 0.25);
+}
+
 /* Syntax highlighting (lowlight) */
 .hljs-comment,
 .hljs-quote {
@@ -430,6 +436,14 @@
   flex: 1;
   overflow-y: auto;
   padding: 8px 0;
+  background:
+    linear-gradient(var(--panel) 30%, transparent),
+    linear-gradient(transparent, var(--panel) 70%) 0 100%,
+    radial-gradient(farthest-side at 50% 0, rgba(0,0,0,0.06), transparent),
+    radial-gradient(farthest-side at 50% 100%, rgba(0,0,0,0.06), transparent) 0 100%;
+  background-size: 100% 40px, 100% 40px, 100% 10px, 100% 10px;
+  background-repeat: no-repeat;
+  background-attachment: local, local, scroll, scroll;
 }
 
 .outline-list::-webkit-scrollbar {
