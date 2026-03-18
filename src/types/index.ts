@@ -3,6 +3,7 @@ export interface Workspace {
   path: string;
   name: string;
   collapsed: boolean;
+  isFile?: boolean; // true when workspace is a single file, not a folder
 }
 
 export interface FileEntry {

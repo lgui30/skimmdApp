@@ -10,6 +10,8 @@ interface TabState {
   setActiveTab: (id: string) => void;
   updateContent: (id: string, content: string) => void;
   reloadTab: (id: string) => Promise<void>;
+  renameTab: (oldPath: string, newPath: string, newName: string) => void;
+  reorderTabs: (fromIndex: number, toIndex: number) => void;
 }
 
 export const useTabStore = create<TabState>((set, get) => ({
@@ -17,6 +19,10 @@ export const useTabStore = create<TabState>((set, get) => ({
   activeTabId: null,
 
   openTab: async (file: FileEntry) => {
+    // Only allow markdown files to prevent crashes
+    const ext = file.extension?.toLowerCase() || "";
+    if (ext !== ".md" && ext !== ".markdown" && ext !== ".txt") return;
+
     const existing = get().tabs.find((t) => t.filePath === file.path);
     if (existing) {
       set({ activeTabId: existing.id });
@@ -74,5 +80,23 @@ export const useTabStore = create<TabState>((set, get) => ({
     } catch {
       // file may have been deleted
     }
+  },
+
+  renameTab: (oldPath: string, newPath: string, newName: string) => {
+    const { tabs, activeTabId } = get();
+    const newTabs = tabs.map((t) =>
+      t.filePath === oldPath
+        ? { ...t, id: newPath, filePath: newPath, fileName: newName }
+        : t
+    );
+    const newActive = activeTabId === oldPath ? newPath : activeTabId;
+    set({ tabs: newTabs, activeTabId: newActive });
+  },
+
+  reorderTabs: (fromIndex: number, toIndex: number) => {
+    const tabs = [...get().tabs];
+    const [moved] = tabs.splice(fromIndex, 1);
+    tabs.splice(toIndex, 0, moved);
+    set({ tabs });
   },
 }));
