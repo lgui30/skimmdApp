@@ -817,6 +817,13 @@ body {
   color: var(--accent);
 }
 
+.toolbar-btn.disabled,
+.toolbar-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ── Search Bar ────────────────────────────── */
 .search-bar {
   padding: 6px 12px;

@@ -1,5 +1,4 @@
 import { Editor } from "@tiptap/react";
-import { useUIStore } from "../../stores/uiStore";
 import {
   Bold,
   Italic,
@@ -16,8 +15,8 @@ import {
   CodeSquare,
   Eye,
   Code2,
-  Maximize2,
-  BookOpen,
+  Undo2,
+  Redo2,
 } from "lucide-react";
 
 interface ToolbarProps {
@@ -27,21 +26,19 @@ interface ToolbarProps {
 }
 
 export default function Toolbar({ editor, sourceMode, onToggleSource }: ToolbarProps) {
-  const toggleZenMode = useUIStore((s) => s.toggleZenMode);
-  const focusMode = useUIStore((s) => s.focusMode);
-  const toggleFocusMode = useUIStore((s) => s.toggleFocusMode);
-
   const btn = (
     label: string,
     icon: React.ReactNode,
     action: () => void,
-    isActive: boolean
+    isActive: boolean,
+    disabled?: boolean
   ) => (
     <button
-      className={`toolbar-btn${isActive ? " active" : ""}`}
+      className={`toolbar-btn${isActive ? " active" : ""}${disabled ? " disabled" : ""}`}
       onClick={action}
       title={label}
       type="button"
+      disabled={disabled}
     >
       {icon}
     </button>
@@ -51,6 +48,13 @@ export default function Toolbar({ editor, sourceMode, onToggleSource }: ToolbarP
     <div className="toolbar">
       {!sourceMode && (
         <>
+          <div className="toolbar-group">
+            {btn("Undo (Cmd+Z)", <Undo2 size={15} />, () => editor.chain().focus().undo().run(), false, !editor.can().undo())}
+            {btn("Redo (Cmd+Shift+Z)", <Redo2 size={15} />, () => editor.chain().focus().redo().run(), false, !editor.can().redo())}
+          </div>
+
+          <div className="toolbar-divider" />
+
           <div className="toolbar-group">
             {btn("Bold (Cmd+B)", <Bold size={15} />, () => editor.chain().focus().toggleBold().run(), editor.isActive("bold"))}
             {btn("Italic (Cmd+I)", <Italic size={15} />, () => editor.chain().focus().toggleItalic().run(), editor.isActive("italic"))}
@@ -94,8 +98,6 @@ export default function Toolbar({ editor, sourceMode, onToggleSource }: ToolbarP
             onToggleSource,
             !!sourceMode
           )}
-        {btn("Focus Mode (Cmd+Shift+R)", <BookOpen size={15} />, toggleFocusMode, focusMode)}
-        {btn("Zen Mode (Cmd+Shift+Enter)", <Maximize2 size={15} />, toggleZenMode, false)}
       </div>
     </div>
   );
