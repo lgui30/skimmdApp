@@ -1,22 +1,30 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Editor } from "@tiptap/react";
-import { Search, X, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, X, ChevronUp, ChevronDown, Replace, ReplaceAll } from "lucide-react";
+import { toast } from "../Toast/Toast";
 
 interface SearchBarProps {
   editor: Editor;
   visible: boolean;
+  showReplace?: boolean;
   onClose: () => void;
 }
 
-export default function SearchBar({ editor, visible, onClose }: SearchBarProps) {
+export default function SearchBar({ editor, visible, showReplace = false, onClose }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+  const [replaceOpen, setReplaceOpen] = useState(showReplace);
+  const [replaceTerm, setReplaceTerm] = useState("");
   const storage = editor.storage.search;
+
+  useEffect(() => {
+    setReplaceOpen(showReplace);
+  }, [showReplace]);
 
   const updateSearch = useCallback(
     (term: string) => {
       storage.searchTerm = term;
       storage.currentIndex = term ? 0 : -1;
-      // Force ProseMirror to recalculate decorations
       editor.view.dispatch(editor.state.tr);
     },
     [editor, storage]
@@ -29,7 +37,6 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
       const wrapped = ((index % results.length) + results.length) % results.length;
       storage.currentIndex = wrapped;
       editor.view.dispatch(editor.state.tr);
-      // Scroll to match
       const match = results[wrapped];
       if (match) {
         editor.commands.setTextSelection(match.from);
@@ -47,8 +54,46 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
   const next = useCallback(() => goTo(storage.currentIndex + 1), [goTo, storage]);
   const prev = useCallback(() => goTo(storage.currentIndex - 1), [goTo, storage]);
 
+  const replaceCurrent = useCallback(() => {
+    const results = storage.results;
+    const idx = storage.currentIndex;
+    if (idx < 0 || idx >= results.length) return;
+    const match = results[idx];
+    editor
+      .chain()
+      .focus()
+      .setTextSelection({ from: match.from, to: match.to })
+      .insertContent(replaceTerm)
+      .run();
+    // Re-trigger search to update decorations
+    editor.view.dispatch(editor.state.tr);
+    // Advance to next match (results will have shifted)
+    const newResults = storage.results;
+    if (newResults.length > 0) {
+      const newIdx = Math.min(idx, newResults.length - 1);
+      storage.currentIndex = newIdx;
+      editor.view.dispatch(editor.state.tr);
+    }
+  }, [editor, storage, replaceTerm]);
+
+  const replaceAll = useCallback(() => {
+    const results = [...storage.results];
+    if (results.length === 0) return;
+    const count = results.length;
+    // Replace from end to start so positions don't shift
+    const chain = editor.chain().focus();
+    for (let i = results.length - 1; i >= 0; i--) {
+      const match = results[i];
+      chain.setTextSelection({ from: match.from, to: match.to }).insertContent(replaceTerm);
+    }
+    chain.run();
+    editor.view.dispatch(editor.state.tr);
+    toast(`Replaced ${count} occurrence${count !== 1 ? "s" : ""}`);
+  }, [editor, storage, replaceTerm]);
+
   const close = useCallback(() => {
     updateSearch("");
+    setReplaceTerm("");
     onClose();
   }, [updateSearch, onClose]);
 
@@ -60,12 +105,19 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
   }, [visible]);
 
   useEffect(() => {
+    if (replaceOpen && replaceInputRef.current) {
+      replaceInputRef.current.focus();
+    }
+  }, [replaceOpen]);
+
+  useEffect(() => {
     if (!visible) {
       updateSearch("");
+      setReplaceTerm("");
     }
   }, [visible, updateSearch]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
       close();
     } else if (e.key === "Enter") {
@@ -74,6 +126,14 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
       } else {
         next();
       }
+    }
+  };
+
+  const handleReplaceKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      close();
+    } else if (e.key === "Enter") {
+      replaceCurrent();
     }
   };
 
@@ -93,7 +153,7 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
           placeholder="Find in document..."
           value={storage.searchTerm}
           onChange={(e) => updateSearch(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleSearchKeyDown}
         />
         {storage.searchTerm && (
           <span className="search-bar-count">
@@ -106,10 +166,32 @@ export default function SearchBar({ editor, visible, onClose }: SearchBarProps) 
         <button className="search-bar-btn" onClick={next} title="Next (Enter)" disabled={count === 0}>
           <ChevronDown size={14} />
         </button>
+        <button className="search-bar-btn" onClick={() => setReplaceOpen(!replaceOpen)} title="Toggle Replace (Cmd+H)">
+          <Replace size={14} />
+        </button>
         <button className="search-bar-btn" onClick={close} title="Close (Esc)">
           <X size={14} />
         </button>
       </div>
+      {replaceOpen && (
+        <div className="search-bar-replace">
+          <input
+            ref={replaceInputRef}
+            className="search-bar-input"
+            type="text"
+            placeholder="Replace with..."
+            value={replaceTerm}
+            onChange={(e) => setReplaceTerm(e.target.value)}
+            onKeyDown={handleReplaceKeyDown}
+          />
+          <button className="search-bar-btn" onClick={replaceCurrent} title="Replace" disabled={count === 0}>
+            <Replace size={14} />
+          </button>
+          <button className="search-bar-btn" onClick={replaceAll} title="Replace All" disabled={count === 0}>
+            <ReplaceAll size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

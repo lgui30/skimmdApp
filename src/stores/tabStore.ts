@@ -1,14 +1,17 @@
 import { create } from "zustand";
 import { readFile } from "../lib/fs";
+import { flushSave, flushTabToDisk } from "../lib/saveRegistry";
+import { useRecentsStore } from "./recentsStore";
 import type { FileEntry, Tab } from "../types";
 
 interface TabState {
   tabs: Tab[];
   activeTabId: string | null;
   openTab: (file: FileEntry) => Promise<void>;
-  closeTab: (id: string) => void;
+  closeTab: (id: string) => Promise<void>;
   setActiveTab: (id: string) => void;
   updateContent: (id: string, content: string) => void;
+  setDirty: (id: string, dirty: boolean) => void;
   reloadTab: (id: string) => Promise<void>;
   renameTab: (oldPath: string, newPath: string, newName: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
@@ -36,11 +39,25 @@ export const useTabStore = create<TabState>((set, get) => ({
       workspaceId: file.workspaceId,
       content,
       lastSaved: Date.now(),
+      dirty: false,
     };
     set({ tabs: [...get().tabs, tab], activeTabId: tab.id });
+    // Track in recents
+    useRecentsStore.getState().addRecent(file.path, file.name, file.workspaceId);
   },
 
-  closeTab: (id: string) => {
+  closeTab: async (id: string) => {
+    // Flush pending auto-save before removing the tab
+    const tab = get().tabs.find((t) => t.id === id);
+    if (tab?.dirty) {
+      try {
+        await flushSave(id);
+      } catch {
+        // Fallback: write content directly if no registered flush
+        await flushTabToDisk(id);
+      }
+    }
+
     const { tabs, activeTabId } = get();
     const index = tabs.findIndex((t) => t.id === id);
     const newTabs = tabs.filter((t) => t.id !== id);
@@ -63,7 +80,13 @@ export const useTabStore = create<TabState>((set, get) => ({
 
   updateContent: (id: string, content: string) => {
     set({
-      tabs: get().tabs.map((t) => (t.id === id ? { ...t, content } : t)),
+      tabs: get().tabs.map((t) => (t.id === id ? { ...t, content, dirty: true } : t)),
+    });
+  },
+
+  setDirty: (id: string, dirty: boolean) => {
+    set({
+      tabs: get().tabs.map((t) => (t.id === id ? { ...t, dirty } : t)),
     });
   },
 
@@ -74,7 +97,7 @@ export const useTabStore = create<TabState>((set, get) => ({
       const content = await readFile(tab.filePath);
       set({
         tabs: get().tabs.map((t) =>
-          t.id === id ? { ...t, content, lastSaved: Date.now() } : t
+          t.id === id ? { ...t, content, lastSaved: Date.now(), dirty: false } : t
         ),
       });
     } catch {

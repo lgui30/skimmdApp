@@ -1,0 +1,175 @@
+{
+  "project": "skimmd",
+  "version": "1.0.0",
+  "created": "2026-03-26",
+  "description": "High-priority PRD for skimmd — native macOS markdown editor built with Tauri v2 + React + TipTap",
+  "issues": [
+    {
+      "id": "HP-001",
+      "title": "Dirty indicator on unsaved tabs",
+      "status": "done",
+      "priority": "high",
+      "category": "UX",
+      "description": "Show a visual dot on tabs with unsaved changes so users know which files are modified.",
+      "problem": "No way to tell which tabs have unsaved edits. Users might close a tab or quit without realizing changes haven't been written to disk.",
+      "requirements": [
+        "Add dirty boolean to Tab type in tabStore",
+        "Set dirty=true when content diverges from last saved",
+        "Set dirty=false after auto-save completes",
+        "Render a dot (•) next to the tab filename when dirty",
+        "Use subtle accent color — not red, since auto-save handles it"
+      ],
+      "affected_files": [
+        "src/types/index.ts",
+        "src/stores/tabStore.ts",
+        "src/components/Tabs/TabBar.tsx",
+        "src/styles/globals.css"
+      ],
+      "acceptance_criteria": [
+        "Dot appears within 100ms of first edit",
+        "Dot disappears after auto-save (800ms debounce)",
+        "Visible but not alarming",
+        "Works correctly across tab switches"
+      ]
+    },
+    {
+      "id": "HP-002",
+      "title": "Widen content area",
+      "status": "done",
+      "priority": "high",
+      "category": "Layout",
+      "description": "Editor content is constrained to ~70ch, wasting screen space. Widen default and ensure tables/code blocks use available width.",
+      "problem": "Tables, code blocks, and long paragraphs feel cramped. Large screens show mostly empty whitespace.",
+      "requirements": [
+        "Increase default max-width from 70ch to ~900px",
+        "Tables and code blocks should use full available width",
+        "Outline panel stays fixed on right without overlap",
+        "Content remains centered and readable"
+      ],
+      "affected_files": [
+        "src/styles/editor.css",
+        "src/styles/globals.css"
+      ],
+      "acceptance_criteria": [
+        "Visibly wider on screens >= 1440px",
+        "Tables render without horizontal scroll in most cases",
+        "Still comfortable reading width",
+        "No horizontal overflow"
+      ]
+    },
+    {
+      "id": "HP-003",
+      "title": "Source mode syntax highlighting and line numbers",
+      "status": "done",
+      "priority": "high",
+      "category": "Editor",
+      "description": "Replace the plain textarea source view with a proper code editor that has markdown syntax highlighting and line numbers.",
+      "problem": "Raw markdown is a plain unstyled textarea. Headers, bold, links, code fences all look identical. No line numbers for navigation.",
+      "requirements": [
+        "Replace textarea with CodeMirror 6 or lightweight alternative",
+        "Markdown syntax highlighting: headings, bold/italic, links, code fences, lists, blockquotes",
+        "Line numbers in gutter",
+        "Light and dark theme support",
+        "Preserve auto-save on content changes",
+        "Maintain Cmd+/ toggle"
+      ],
+      "affected_files": [
+        "src/components/Editor/SourceView.tsx",
+        "src/styles/editor.css",
+        "package.json"
+      ],
+      "acceptance_criteria": [
+        "Markdown syntax is color-coded",
+        "Line numbers visible in left gutter",
+        "Colors adapt to light/dark theme",
+        "No perf degradation on files up to 10k lines",
+        "Tab inserts 2 spaces",
+        "Content syncs correctly back to WYSIWYG"
+      ]
+    },
+    {
+      "id": "HP-004",
+      "title": "Code block copy button",
+      "status": "done",
+      "priority": "high",
+      "category": "Editor",
+      "description": "Add a one-click copy button to fenced code blocks.",
+      "problem": "Users must manually select and copy code block text. Tedious for multi-line blocks and easy to miss characters.",
+      "requirements": [
+        "Copy icon button in top-right of each fenced code block",
+        "Appears on hover",
+        "Copies raw code text to clipboard",
+        "Visual feedback: icon changes to checkmark for 1.5s",
+        "Only on fenced blocks, not inline code"
+      ],
+      "affected_files": [
+        "src/components/Editor/CodeBlockView.tsx",
+        "src/styles/editor.css"
+      ],
+      "acceptance_criteria": [
+        "Button appears on hover",
+        "Copies exact code without extra whitespace",
+        "Checkmark feedback after copy",
+        "Does not interfere with code editing",
+        "Works for all languages including mermaid source"
+      ]
+    },
+    {
+      "id": "HP-005",
+      "title": "Undo/redo buttons in toolbar",
+      "status": "done",
+      "priority": "high",
+      "category": "Toolbar",
+      "description": "Add visible undo/redo buttons. Currently only Cmd+Z / Cmd+Shift+Z work with no visual affordance.",
+      "problem": "Users who don't know shortcuts have no way to undo. Toolbar should expose all critical actions.",
+      "requirements": [
+        "Add Undo and Redo buttons at left side of toolbar",
+        "Use Undo2/Redo2 icons from lucide-react",
+        "Disable when nothing to undo/redo (greyed out)",
+        "Tooltip shows shortcut: 'Undo (Cmd+Z)'",
+        "Use TipTap editor.can().undo() / .redo() for state"
+      ],
+      "affected_files": [
+        "src/components/Editor/Toolbar.tsx"
+      ],
+      "acceptance_criteria": [
+        "Buttons visible before formatting group",
+        "Disabled state when no history",
+        "State updates after each edit",
+        "Click triggers undo/redo correctly",
+        "Tooltips show shortcuts"
+      ]
+    },
+    {
+      "id": "HP-006",
+      "title": "Find and replace in document",
+      "status": "done",
+      "priority": "high",
+      "category": "Editor",
+      "description": "Extend the existing Cmd+F search to include replace. Currently find-only with no replace capability.",
+      "problem": "Renaming terms, fixing repeated typos, or updating text across a document requires manually finding and editing each occurrence.",
+      "requirements": [
+        "Add replace input below search input in SearchBar",
+        "Cmd+H opens search with replace visible, Cmd+F opens without",
+        "Replace button: replace current match and advance",
+        "Replace All button: replace all matches at once",
+        "Show match count (already partial)",
+        "Preserve case-sensitive toggle",
+        "Entire replace operation undoable with Cmd+Z"
+      ],
+      "affected_files": [
+        "src/components/Editor/SearchBar.tsx",
+        "src/components/Editor/searchExtension.ts",
+        "src/styles/globals.css"
+      ],
+      "acceptance_criteria": [
+        "Cmd+H opens with replace field visible",
+        "Cmd+F opens without replace (existing behavior)",
+        "Replace replaces current match and moves to next",
+        "Replace All shows count in toast",
+        "Full operation undoable with Cmd+Z",
+        "Replace field hides when not needed"
+      ]
+    }
+  ]
+}

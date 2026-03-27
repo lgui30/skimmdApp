@@ -39,6 +39,14 @@ export interface Tab {
   workspaceId: string;
   content: string;
   lastSaved: number;
+  dirty: boolean;
+}
+
+export interface RecentFile {
+  filePath: string;
+  fileName: string;
+  lastOpened: number;
+  workspaceId: string;
 }
 
 export type ThemeMode = "light" | "dark" | "system";

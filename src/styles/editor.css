@@ -7,7 +7,7 @@
   line-height: 1.7;
   color: var(--ink);
   caret-color: var(--ink);
-  max-width: 70ch;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -101,6 +101,45 @@
   border-radius: 0;
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* Code block wrapper with copy button */
+.code-block-wrapper {
+  position: relative;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.code-block-wrapper:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: var(--hover-bg);
+  color: var(--ink);
+}
+
+.code-copy-btn.copied {
+  opacity: 1;
+  color: #22c55e;
+  border-color: #22c55e;
 }
 
 /* Blockquotes */
@@ -708,4 +747,207 @@
 
 [data-theme="dark"] .mermaid-error-box .mermaid-error-label {
   color: #f87171;
+}
+
+/* ── Sentence Insight ────────────────────────────── */
+
+/* Explain mode cursor */
+.editor-container.explain-mode .editor-wrapper .tiptap {
+  cursor: help;
+}
+
+.editor-container.explain-mode .editor-wrapper .tiptap p:hover,
+.editor-container.explain-mode .editor-wrapper .tiptap li:hover,
+.editor-container.explain-mode .editor-wrapper .tiptap h1:hover,
+.editor-container.explain-mode .editor-wrapper .tiptap h2:hover,
+.editor-container.explain-mode .editor-wrapper .tiptap h3:hover,
+.editor-container.explain-mode .editor-wrapper .tiptap blockquote:hover {
+  background: var(--hover-bg);
+  border-radius: 4px;
+  transition: background 0.12s;
+}
+
+/* Sentence highlight */
+.insight-highlight {
+  background: rgba(47, 111, 237, 0.15);
+  border-radius: 3px;
+  padding: 1px 0;
+  transition: background 0.2s;
+}
+
+[data-theme="dark"] .insight-highlight {
+  background: rgba(91, 154, 255, 0.2);
+}
+
+/* Popover card */
+.insight-popover {
+  width: 360px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), 0 8px 32px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-ui);
+  animation: insight-fade-in 0.15s ease-out;
+}
+
+@keyframes insight-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.insight-popover::-webkit-scrollbar {
+  width: 4px;
+}
+
+.insight-popover::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-strong);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.insight-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.insight-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.insight-close:hover {
+  background: var(--hover-bg);
+  color: var(--ink);
+}
+
+.insight-body {
+  padding: 14px;
+}
+
+/* Loading state */
+.insight-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.insight-spinner {
+  animation: insight-spin 0.8s linear infinite;
+  color: var(--accent);
+}
+
+@keyframes insight-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.insight-error {
+  font-size: 13px;
+  color: var(--red);
+  padding: 4px 0;
+  line-height: 1.5;
+}
+
+/* Selected sentence quote */
+.insight-sentence {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  padding: 4px 10px;
+  margin-bottom: 12px;
+  line-height: 1.5;
+  background: var(--hover-bg);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Explanation text */
+.insight-explanation {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+/* Key Terms section */
+.insight-terms {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+
+.insight-terms-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.insight-terms-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.insight-terms-list li {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.insight-terms-list li strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Explain mode toolbar indicator */
+.toolbar-btn.active[title="Exit Explain Mode"],
+.toolbar-btn.active[title*="Explain Mode"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Dark mode popover */
+[data-theme="dark"] .insight-popover {
+  box-shadow: var(--shadow), 0 8px 32px rgba(0, 0, 0, 0.25);
 }

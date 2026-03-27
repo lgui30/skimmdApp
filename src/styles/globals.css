@@ -187,6 +187,76 @@ body {
   margin-top: 16px;
 }
 
+.welcome-recents {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.welcome-recents-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.welcome-recents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcome-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--ink);
+  text-align: left;
+  transition: background 0.1s;
+  width: 100%;
+}
+
+.welcome-recent-item:hover {
+  background: var(--hover-bg);
+}
+
+.welcome-recent-icon {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.welcome-recent-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.welcome-recent-folder {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome-recent-time {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Sidebar */
 .sidebar {
   background: var(--sidebar-bg);
@@ -680,6 +750,16 @@ body {
   max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tab-dirty-dot {
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .tab-close {
@@ -705,6 +785,18 @@ body {
 .tab-close:hover {
   background: var(--active-bg);
   color: var(--ink);
+}
+
+.tab-rename-input {
+  width: 120px;
+  padding: 1px 4px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  outline: none;
 }
 
 /* Editor area */
@@ -807,6 +899,13 @@ body {
   color: var(--accent);
 }
 
+.toolbar-btn.disabled,
+.toolbar-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
 /* ── Search Bar ────────────────────────────── */
 .search-bar {
   padding: 6px 12px;
@@ -878,28 +977,16 @@ body {
   cursor: default;
 }
 
-/* ── Zen Mode ────────────────────────────── */
-.app.zen {
-  grid-template-columns: 1fr;
-}
-
-.app.zen .main {
-  max-width: 100%;
-}
-
-.app.zen .editor-area {
+.search-bar-replace {
   display: flex;
-  justify-content: center;
-}
-
-.app.zen .editor-container {
-  max-width: 780px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.app.zen .editor-container.zen-mode .editor-wrapper {
-  padding: 60px 40px 200px;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  max-width: 420px;
+  margin-top: 4px;
 }
 
 /* ── Toolbar spacer ────────────────────────────── */
@@ -955,29 +1042,21 @@ body {
   font-weight: 500;
 }
 
-/* ── Source View ────────────────────────────── */
+/* ── Source View (CodeMirror) ────────────────────────────── */
 .source-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.source-textarea {
+.source-view .cm-editor {
   flex: 1;
-  border: none;
-  outline: none;
-  resize: none;
-  padding: 40px 60px 120px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--ink);
   background: var(--panel);
-  tab-size: 2;
 }
 
-.source-textarea::placeholder {
-  color: var(--muted);
+.source-view .cm-editor.cm-focused {
+  outline: none;
 }
 
 /* ── Context Menu ────────────────────────────── */
@@ -1200,6 +1279,107 @@ body {
 .favorite-remove:hover {
   background: rgba(235, 87, 87, 0.1);
   color: #eb5757;
+}
+
+/* ── Recents Section ────────────────────────────── */
+.recents-section {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+
+.recents-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+  transition: background 0.1s;
+}
+
+.recents-header:hover {
+  background: var(--sidebar-hover);
+}
+
+.recents-header-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.recents-title {
+  flex: 1;
+}
+
+.recents-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.1s, color 0.1s;
+}
+
+.recents-clear-btn:hover {
+  background: rgba(235, 87, 87, 0.1);
+  color: #eb5757;
+}
+
+.recents-list {
+  padding: 2px 0;
+}
+
+.recents-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 16px 4px 40px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ink);
+  transition: background 0.1s;
+  min-width: 0;
+}
+
+.recents-item:hover {
+  background: var(--sidebar-hover);
+}
+
+.recents-item-icon {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.recents-item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.recents-item-meta {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.recents-item-time {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* ── Clickable file info path ────────────────────────────── */
@@ -1576,30 +1756,6 @@ body {
 .tab-sidebar-toggle:hover {
   background: var(--hover-bg);
   color: var(--ink);
-}
-
-/* ── Focus Mode ────────────────────────────── */
-.editor-container.focus-mode .editor-wrapper {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 60px 40px 200px;
-}
-
-.editor-container.focus-mode .tiptap {
-  font-size: 18px;
-  line-height: 1.8;
-}
-
-.editor-container.focus-mode .tiptap h1 {
-  font-size: 34px;
-}
-
-.editor-container.focus-mode .tiptap h2 {
-  font-size: 27px;
-}
-
-.editor-container.focus-mode .tiptap h3 {
-  font-size: 22px;
 }
 
 /* Empty state */
