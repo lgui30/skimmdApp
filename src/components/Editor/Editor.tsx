@@ -24,6 +24,7 @@ export default function Editor({ filePath, content }: EditorProps) {
   const mountedRef = useRef(false);
   const isExternalUpdateRef = useRef(false);
   const [searchVisible, setSearchVisible] = useState(false);
+  const [replaceVisible, setReplaceVisible] = useState(false);
   const [sourceMode, setSourceMode] = useState(false);
 
   const editor = useEditor({
@@ -63,10 +64,14 @@ export default function Editor({ filePath, content }: EditorProps) {
     }
   }, [editor, filePath, content]);
 
-  // Cmd+F to open search, Cmd+/ to toggle source
-  const handleSearchOpen = useCallback(() => setSearchVisible(true), []);
+  // Cmd+F to open search, Cmd+H for replace, Cmd+/ to toggle source
+  const handleSearchOpen = useCallback((withReplace = false) => {
+    setSearchVisible(true);
+    setReplaceVisible(withReplace);
+  }, []);
   const handleSearchClose = useCallback(() => {
     setSearchVisible(false);
+    setReplaceVisible(false);
     editor?.commands.focus();
   }, [editor]);
 
@@ -91,7 +96,11 @@ export default function Editor({ filePath, content }: EditorProps) {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "f") {
         e.preventDefault();
-        handleSearchOpen();
+        handleSearchOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "h") {
+        e.preventDefault();
+        handleSearchOpen(true);
       }
       if ((e.metaKey || e.ctrlKey) && e.key === "/") {
         e.preventDefault();
@@ -117,7 +126,7 @@ export default function Editor({ filePath, content }: EditorProps) {
     <div className="editor-container">
       <Toolbar editor={editor} sourceMode={sourceMode} onToggleSource={handleToggleSource} />
       {searchVisible && !sourceMode && (
-        <SearchBar editor={editor} visible={searchVisible} onClose={handleSearchClose} />
+        <SearchBar editor={editor} visible={searchVisible} showReplace={replaceVisible} onClose={handleSearchClose} />
       )}
       <div className="editor-body">
         {sourceMode ? (

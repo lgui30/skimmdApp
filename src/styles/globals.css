@@ -895,6 +895,18 @@ body {
   cursor: default;
 }
 
+.search-bar-replace {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-strong);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  max-width: 420px;
+  margin-top: 4px;
+}
+
 /* ── Toolbar spacer ────────────────────────────── */
 .toolbar-spacer {
   flex: 1;
