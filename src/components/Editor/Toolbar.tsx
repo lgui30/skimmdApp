@@ -17,7 +17,9 @@ import {
   Code2,
   Undo2,
   Redo2,
+  BrainCircuit,
 } from "lucide-react";
+import { useInsightStore } from "../../stores/insightStore";
 
 interface ToolbarProps {
   editor: Editor;
@@ -26,6 +28,9 @@ interface ToolbarProps {
 }
 
 export default function Toolbar({ editor, sourceMode, onToggleSource }: ToolbarProps) {
+  const explainMode = useInsightStore((s) => s.explainMode);
+  const toggleExplainMode = useInsightStore((s) => s.toggleExplainMode);
+
   const btn = (
     label: string,
     icon: React.ReactNode,
@@ -91,6 +96,13 @@ export default function Toolbar({ editor, sourceMode, onToggleSource }: ToolbarP
       <div className="toolbar-spacer" />
 
       <div className="toolbar-group">
+        {!sourceMode &&
+          btn(
+            explainMode ? "Exit Explain Mode" : "Explain Mode (Cmd+Click)",
+            <BrainCircuit size={15} />,
+            toggleExplainMode,
+            explainMode
+          )}
         {onToggleSource &&
           btn(
             sourceMode ? "Rich Text (Cmd+/)" : "Source (Cmd+/)",
