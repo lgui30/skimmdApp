@@ -103,6 +103,45 @@
   line-height: 1.6;
 }
 
+/* Code block wrapper with copy button */
+.code-block-wrapper {
+  position: relative;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.code-block-wrapper:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  background: var(--hover-bg);
+  color: var(--ink);
+}
+
+.code-copy-btn.copied {
+  opacity: 1;
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
 /* Blockquotes */
 .tiptap blockquote {
   border-left: 3px solid var(--border-strong);

@@ -1,7 +1,7 @@
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import mermaid from "mermaid";
-import { ChevronDown, ChevronRight, Code } from "lucide-react";
+import { ChevronDown, ChevronRight, Code, Copy, Check } from "lucide-react";
 
 function initMermaid() {
   const isDark =
@@ -112,14 +112,41 @@ export default function CodeBlockView({
     };
   }, [editor, isMermaid, node.nodeSize, getPos]);
 
-  // Non-mermaid: standard code block
+  const [copied, setCopied] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 1500);
+    });
+  }, [code]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
+  }, []);
+
+  // Non-mermaid: standard code block with copy button
   if (!isMermaid) {
     return (
-      <NodeViewWrapper as="pre" data-language={language}>
-        <NodeViewContent
-          as="code"
-          className={language ? `language-${language}` : ""}
-        />
+      <NodeViewWrapper className="code-block-wrapper" data-language={language}>
+        <button
+          className={`code-copy-btn${copied ? " copied" : ""}`}
+          onClick={handleCopy}
+          contentEditable={false}
+          title="Copy code"
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+        </button>
+        <pre>
+          <NodeViewContent
+            as="code"
+            className={language ? `language-${language}` : ""}
+          />
+        </pre>
       </NodeViewWrapper>
     );
   }
