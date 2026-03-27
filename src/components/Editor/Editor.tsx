@@ -3,7 +3,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { editorExtensions } from "./extensions";
 import { useAutoSave } from "../../hooks/useAutoSave";
 import { useTabStore } from "../../stores/tabStore";
-import { useUIStore } from "../../stores/uiStore";
 import Toolbar from "./Toolbar";
 import SearchBar from "./SearchBar";
 import StatusBar from "./StatusBar";
@@ -17,14 +16,15 @@ interface EditorProps {
 }
 
 export default function Editor({ filePath, content }: EditorProps) {
-  const { save, setBaseline } = useAutoSave();
   const updateContent = useTabStore((s) => s.updateContent);
+  const setDirty = useTabStore((s) => s.setDirty);
+  const { save, setBaseline } = useAutoSave(800, (savedPath) => {
+    setDirty(savedPath, false);
+  });
   const mountedRef = useRef(false);
   const isExternalUpdateRef = useRef(false);
   const [searchVisible, setSearchVisible] = useState(false);
   const [sourceMode, setSourceMode] = useState(false);
-  const zenMode = useUIStore((s) => s.zenMode);
-  const focusMode = useUIStore((s) => s.focusMode);
 
   const editor = useEditor({
     extensions: editorExtensions,
@@ -50,7 +50,7 @@ export default function Editor({ filePath, content }: EditorProps) {
     };
   }, []);
 
-  // Sync editor content when file changes externally (via file watcher + reloadTab)
+  // Sync editor content on mount and when file changes externally
   useEffect(() => {
     if (editor && content !== undefined) {
       const currentMd = editor.storage.markdown.getMarkdown();
@@ -61,7 +61,7 @@ export default function Editor({ filePath, content }: EditorProps) {
       }
       setBaseline(content);
     }
-  }, [filePath, content]);
+  }, [editor, filePath, content]);
 
   // Cmd+F to open search, Cmd+/ to toggle source
   const handleSearchOpen = useCallback(() => setSearchVisible(true), []);
@@ -114,10 +114,8 @@ export default function Editor({ filePath, content }: EditorProps) {
   )?.content ?? content;
 
   return (
-    <div className={`editor-container${zenMode ? " zen-mode" : ""}${focusMode ? " focus-mode" : ""}`}>
-      {!zenMode && !focusMode && (
-        <Toolbar editor={editor} sourceMode={sourceMode} onToggleSource={handleToggleSource} />
-      )}
+    <div className="editor-container">
+      <Toolbar editor={editor} sourceMode={sourceMode} onToggleSource={handleToggleSource} />
       {searchVisible && !sourceMode && (
         <SearchBar editor={editor} visible={searchVisible} onClose={handleSearchClose} />
       )}
@@ -134,11 +132,11 @@ export default function Editor({ filePath, content }: EditorProps) {
               <EditorContent editor={editor} />
               <SlashMenu editor={editor} />
             </div>
-            {!zenMode && !focusMode && <Outline editor={editor} />}
+            <Outline editor={editor} />
           </>
         )}
       </div>
-      {!focusMode && <StatusBar editor={editor} />}
+      <StatusBar editor={editor} />
     </div>
   );
 }

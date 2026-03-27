@@ -680,6 +680,16 @@ body {
   max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tab-dirty-dot {
+  color: var(--accent);
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .tab-close {
@@ -876,30 +886,6 @@ body {
 .search-bar-btn:disabled {
   opacity: 0.3;
   cursor: default;
-}
-
-/* ── Zen Mode ────────────────────────────── */
-.app.zen {
-  grid-template-columns: 1fr;
-}
-
-.app.zen .main {
-  max-width: 100%;
-}
-
-.app.zen .editor-area {
-  display: flex;
-  justify-content: center;
-}
-
-.app.zen .editor-container {
-  max-width: 780px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.app.zen .editor-container.zen-mode .editor-wrapper {
-  padding: 60px 40px 200px;
 }
 
 /* ── Toolbar spacer ────────────────────────────── */
@@ -1576,30 +1562,6 @@ body {
 .tab-sidebar-toggle:hover {
   background: var(--hover-bg);
   color: var(--ink);
-}
-
-/* ── Focus Mode ────────────────────────────── */
-.editor-container.focus-mode .editor-wrapper {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 60px 40px 200px;
-}
-
-.editor-container.focus-mode .tiptap {
-  font-size: 18px;
-  line-height: 1.8;
-}
-
-.editor-container.focus-mode .tiptap h1 {
-  font-size: 34px;
-}
-
-.editor-container.focus-mode .tiptap h2 {
-  font-size: 27px;
-}
-
-.editor-container.focus-mode .tiptap h3 {
-  font-size: 22px;
 }
 
 /* Empty state */

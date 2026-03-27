@@ -105,7 +105,10 @@ export default function TabBar() {
           onDrop={(e) => handleDrop(e, index)}
           onDragEnd={handleDragEnd}
         >
-          <span className="tab-name">{tab.fileName}</span>
+          <span className="tab-name">
+            {tab.dirty && <span className="tab-dirty-dot">•</span>}
+            {tab.fileName}
+          </span>
           <button
             className="tab-close"
             onClick={(e) => {

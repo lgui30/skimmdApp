@@ -39,6 +39,7 @@ export interface Tab {
   workspaceId: string;
   content: string;
   lastSaved: number;
+  dirty: boolean;
 }
 
 export type ThemeMode = "light" | "dark" | "system";
