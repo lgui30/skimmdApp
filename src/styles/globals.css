@@ -941,29 +941,21 @@ body {
   font-weight: 500;
 }
 
-/* ── Source View ────────────────────────────── */
+/* ── Source View (CodeMirror) ────────────────────────────── */
 .source-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-.source-textarea {
+.source-view .cm-editor {
   flex: 1;
-  border: none;
-  outline: none;
-  resize: none;
-  padding: 40px 60px 120px;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--ink);
   background: var(--panel);
-  tab-size: 2;
 }
 
-.source-textarea::placeholder {
-  color: var(--muted);
+.source-view .cm-editor.cm-focused {
+  outline: none;
 }
 
 /* ── Context Menu ────────────────────────────── */
