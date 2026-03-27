@@ -4,8 +4,10 @@ import { useWorkspaceStore } from "../../stores/workspaceStore";
 import { useTabStore } from "../../stores/tabStore";
 import { useZoomStore } from "../../stores/zoomStore";
 import { useFavoritesStore } from "../../stores/favoritesStore";
+import { useRecentsStore } from "../../stores/recentsStore";
 import WorkspaceSection from "./WorkspaceSection";
 import FavoritesSection from "./FavoritesSection";
+import RecentsSection from "./RecentsSection";
 import FileInfo from "./FileInfo";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import { Plus, ZoomIn, ZoomOut, ArrowUpAZ, ArrowDownAZ, Clock, PanelLeftClose } from "lucide-react";
@@ -39,9 +41,11 @@ export default function Sidebar() {
   const openTab = useTabStore((s) => s.openTab);
   const { zoom, zoomIn, zoomOut, resetZoom } = useZoomStore();
   const loadFavorites = useFavoritesStore((s) => s.loadFavorites);
+  const loadRecents = useRecentsStore((s) => s.loadRecents);
 
   useEffect(() => {
     loadFavorites();
+    loadRecents();
   }, []);
 
   const handleOpen = async () => {
@@ -52,6 +56,17 @@ export default function Sidebar() {
         await addWorkspace(result.path);
       } else {
         await addFile(result.path);
+        // Auto-open the file as a tab
+        const name = result.path.split("/").pop() || result.path;
+        const ext = name.substring(name.lastIndexOf(".")).toLowerCase();
+        const ws = useWorkspaceStore.getState().workspaces.find((w) => w.path === result.path);
+        openTab({
+          name,
+          path: result.path,
+          relativePath: name,
+          workspaceId: ws?.id || "",
+          extension: ext,
+        });
       }
     } catch (err) {
       console.error("open_file_or_folder failed:", err);
@@ -129,6 +144,7 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-workspaces">
+        <RecentsSection />
         <FavoritesSection />
         {workspaces.map((ws) => (
           <WorkspaceSection

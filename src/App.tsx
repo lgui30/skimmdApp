@@ -12,6 +12,8 @@ import ToastContainer, { toast } from "./components/Toast/Toast";
 import QuickOpen from "./components/QuickOpen/QuickOpen";
 import GlobalSearch from "./components/Search/GlobalSearch";
 import { useUIStore } from "./stores/uiStore";
+import { flushAllSaves, flushTabToDisk } from "./lib/saveRegistry";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const DEFAULT_SIDEBAR_WIDTH = 260;
 const MIN_SIDEBAR_WIDTH = 180;
@@ -34,12 +36,6 @@ export default function App() {
 
   const activeTab = tabs.find((t) => t.id === activeTabId);
 
-  const zenMode = useUIStore((s) => s.zenMode);
-  const toggleZenMode = useUIStore((s) => s.toggleZenMode);
-  const setZenMode = useUIStore((s) => s.setZenMode);
-  const focusMode = useUIStore((s) => s.focusMode);
-  const toggleFocusMode = useUIStore((s) => s.toggleFocusMode);
-  const setFocusMode = useUIStore((s) => s.setFocusMode);
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
 
@@ -91,14 +87,30 @@ export default function App() {
     resetZoom();
   }, []);
 
+  // Flush all dirty tabs before the app window closes (Tauri only)
+  useEffect(() => {
+    if (!(window as any).__TAURI_INTERNALS__) return;
+    const promise = getCurrentWindow().onCloseRequested(async (e) => {
+      const dirtyTabs = useTabStore.getState().tabs.filter((t) => t.dirty);
+      if (dirtyTabs.length > 0) {
+        e.preventDefault();
+        await flushAllSaves();
+        for (const tab of dirtyTabs) {
+          if (useTabStore.getState().tabs.find((t) => t.id === tab.id)?.dirty) {
+            await flushTabToDisk(tab.filePath);
+          }
+        }
+        getCurrentWindow().close();
+      }
+    });
+    return () => {
+      promise.then((unlisten) => unlisten());
+    };
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape exits zen mode / focus mode
-      if (e.key === "Escape") {
-        if (useUIStore.getState().focusMode) setFocusMode(false);
-        if (useUIStore.getState().zenMode) setZenMode(false);
-      }
       if (e.metaKey || e.ctrlKey) {
         if (e.key === "=" || e.key === "+") {
           e.preventDefault();
@@ -109,16 +121,6 @@ export default function App() {
         } else if (e.key === "0") {
           e.preventDefault();
           resetZoom();
-        }
-        // Cmd+Shift+Enter: zen mode
-        if (e.shiftKey && e.key === "Enter") {
-          e.preventDefault();
-          toggleZenMode();
-        }
-        // Cmd+Shift+R: focus mode
-        if (e.shiftKey && e.key === "R") {
-          e.preventDefault();
-          toggleFocusMode();
         }
         // Cmd+\: toggle sidebar
         if (e.key === "\\") {
@@ -177,12 +179,12 @@ export default function App() {
     return <WelcomeScreen />;
   }
 
-  const showSidebar = !zenMode && !sidebarCollapsed;
+  const showSidebar = !sidebarCollapsed;
 
   return (
     <div
-      className={`app${zenMode ? " zen" : ""}${sidebarCollapsed && !zenMode ? " sidebar-collapsed" : ""}`}
-      style={zenMode ? undefined : showSidebar ? { gridTemplateColumns: `${sidebarWidth}px auto 1fr` } : { gridTemplateColumns: "1fr" }}
+      className={`app${sidebarCollapsed ? " sidebar-collapsed" : ""}`}
+      style={showSidebar ? { gridTemplateColumns: `${sidebarWidth}px auto 1fr` } : { gridTemplateColumns: "1fr" }}
     >
       {showSidebar && (
         <>
@@ -195,7 +197,7 @@ export default function App() {
         </>
       )}
       <main className="main">
-        {!zenMode && <TabBar />}
+        <TabBar />
         <div className="editor-area" style={{ zoom: `${zoom}%` }}>
           {activeTab ? (
             <Editor
